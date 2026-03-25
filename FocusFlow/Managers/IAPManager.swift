@@ -2,12 +2,21 @@ import Foundation
 import StoreKit
 import Combine
 
-/// IAP产品类型
+/// IAP产品类型 - 简化：只保留终身付费，避免ADHD用户选择困难
 enum IAPProductType: String, CaseIterable {
-    case lifetimeUnlock = "com.focusflow.lifetime"  // $9.99 终身解锁
-    case monthlySubscription = "com.focusflow.monthly" // $2.99/月 订阅
+    case lifetimeUnlock = "com.focusflow.lifetime"  // $4.99 终身解锁（首月促销$2.99）
     
-    static let allProductIDs = [lifetimeUnlock.rawValue, monthlySubscription.rawValue]
+    static let allProductIDs = [lifetimeUnlock.rawValue]
+    
+    /// 显示价格（实际价格以App Store配置为准）
+    var displayPrice: String {
+        return "$4.99"
+    }
+    
+    /// 促销价格
+    var promotionalPrice: String {
+        return "$2.99"
+    }
 }
 
 /// 付费功能类型
@@ -58,20 +67,13 @@ enum PurchaseStatus {
     case restored
 }
 
-/// 订阅状态
+/// 订阅状态 - 简化：只保留终身解锁，避免ADHD用户选择困难
 enum SubscriptionStatus: Equatable {
     case notPurchased
     case lifetime
-    case activeMonthly(expirationDate: Date)
-    case expired
     
     var isPremium: Bool {
-        switch self {
-        case .lifetime, .activeMonthly:
-            return true
-        default:
-            return false
-        }
+        return self == .lifetime
     }
     
     var displayText: String {
@@ -79,11 +81,7 @@ enum SubscriptionStatus: Equatable {
         case .notPurchased:
             return "免费版"
         case .lifetime:
-            return "终身会员"
-        case .activeMonthly:
-            return "月度会员"
-        case .expired:
-            return "已过期"
+            return "完整版"
         }
     }
 }
@@ -108,7 +106,6 @@ class IAPManager: ObservableObject {
     private let userDefaults = UserDefaults.standard
     private let subscriptionStatusKey = "subscriptionStatus"
     private let lifetimePurchasedKey = "lifetimePurchased"
-    private let expirationDateKey = "subscriptionExpirationDate"
     
     // MARK: - Initialization
     private init() {
@@ -238,22 +235,13 @@ class IAPManager: ObservableObject {
         }
     }
     
-    /// 更新订阅状态
+    /// 更新订阅状态 - 简化：只处理终身解锁
     private func updateSubscriptionStatus(for transaction: Transaction) async {
         let productID = transaction.productID
         
         if productID == IAPProductType.lifetimeUnlock.rawValue {
             subscriptionStatus = .lifetime
             savePurchaseStatus()
-        } else if productID == IAPProductType.monthlySubscription.rawValue {
-            if let expirationDate = transaction.expirationDate {
-                if expirationDate > Date() {
-                    subscriptionStatus = .activeMonthly(expirationDate: expirationDate)
-                } else {
-                    subscriptionStatus = .expired
-                }
-                savePurchaseStatus()
-            }
         }
     }
     
@@ -276,11 +264,8 @@ class IAPManager: ObservableObject {
         switch subscriptionStatus {
         case .lifetime:
             userDefaults.set(true, forKey: lifetimePurchasedKey)
-        case .activeMonthly(let expirationDate):
-            userDefaults.set(expirationDate, forKey: expirationDateKey)
         default:
             userDefaults.removeObject(forKey: lifetimePurchasedKey)
-            userDefaults.removeObject(forKey: expirationDateKey)
         }
     }
     
@@ -289,16 +274,6 @@ class IAPManager: ObservableObject {
         // 检查是否购买了终身版
         if userDefaults.bool(forKey: lifetimePurchasedKey) {
             subscriptionStatus = .lifetime
-            return
-        }
-        
-        // 检查订阅状态
-        if let expirationDate = userDefaults.object(forKey: expirationDateKey) as? Date {
-            if expirationDate > Date() {
-                subscriptionStatus = .activeMonthly(expirationDate: expirationDate)
-            } else {
-                subscriptionStatus = .expired
-            }
         }
     }
     

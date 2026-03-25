@@ -1,0 +1,4 @@
+import Foundation
+
+// This file is needed for Core Data model compilation
+// The actual model is defined in CoreDataEntities.swift

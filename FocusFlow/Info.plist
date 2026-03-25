@@ -22,6 +22,20 @@
     <string>1</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
+    
+    <!-- 权限说明 - 通知 -->
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>FocusFlow 需要发送通知来提醒您完成任务和保持专注习惯。</string>
+    
+    <!-- 权限说明 - HealthKit -->
+    <key>NSHealthShareUsageDescription</key>
+    <string>FocusFlow 需要访问您的步数和活动数据来提供活动提醒和解锁运动相关徽章。您的健康数据仅用于应用内显示，不会上传到任何服务器。</string>
+    
+    <!-- 应用商店元数据 -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+    
+    <!-- 用户界面 -->
     <key>UIApplicationSceneManifest</key>
     <dict>
         <key>UIApplicationSupportsMultipleScenes</key>
@@ -31,10 +45,15 @@
     <true/>
     <key>UILaunchScreen</key>
     <dict/>
+    
+    <!-- 设备支持 -->
     <key>UIRequiredDeviceCapabilities</key>
     <array>
         <string>armv7</string>
+        <string>healthkit</string>
     </array>
+    
+    <!-- 屏幕方向 -->
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
@@ -48,5 +67,16 @@
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    
+    <!-- 后台模式 -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>processing</string>
+    </array>
+    
+    <!-- 应用分类 -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.productivity</string>
 </dict>
 </plist>

@@ -156,7 +156,7 @@ def screenshot1_home():
     # 水平居中
     plus_x = PLUS_BTN_X + (PLUS_BTN_SIZE - plus_w) // 2
     # 垂直居中 - +号字体基线问题，大幅向上偏移
-    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 40
+    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 30
     draw.text((plus_x, plus_y), "+", fill=WHITE, font=font_plus)
     
     # ===== 任务卡片列表 =====

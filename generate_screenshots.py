@@ -45,14 +45,22 @@ def draw_circle_progress(draw, center, radius, progress, color, bg_color):
     draw.pieslice([x-radius, y-radius, x+radius, y+radius], start=start_angle, end=end_angle, fill=color)
 
 def get_font(size):
-    """获取字体"""
-    try:
-        return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size)
-    except:
+    """获取字体 - 优先使用支持中文的字体"""
+    font_paths = [
+        "/tmp/NotoSansCJKsc-Bold.otf",  # 下载的中文支持字体
+        "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "/System/Library/Fonts/PingFang.ttc",  # macOS 中文字体
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",
+    ]
+    
+    for path in font_paths:
         try:
-            return ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", size)
+            return ImageFont.truetype(path, size)
         except:
-            return ImageFont.load_default()
+            continue
+    
+    return ImageFont.load_default()
 
 def screenshot1_home():
     """截图 1: 首页 - 今日任务"""

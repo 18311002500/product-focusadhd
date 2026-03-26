@@ -61,8 +61,9 @@ def screenshot1_home():
     font_check = get_font(32)           # 对勾
     font_points = get_font(30)          # 积分文字
     
-    # 全局边距
+    # 全局边距和对齐参数
     MARGIN = 60
+    RIGHT_PADDING = 30  # 右侧按钮距离边缘的间距
     CARD_RADIUS = 25
     
     # ===== 顶部标题 =====
@@ -134,23 +135,28 @@ def screenshot1_home():
     # 左侧标题
     draw.text((MARGIN, TASK_SECTION_Y), "今日任务", fill=DARK_COLOR, font=font_card_title)
     
-    # 右侧+按钮 - 与任务卡片的完成按钮在同一垂直线上
+    # 右侧+按钮 - 与任务卡片的完成按钮精确对齐
+    # 完成按钮的右边距：MARGIN + 30，按钮大小：58
+    # +按钮使用相同的右边距：MARGIN + 30，按钮大小：68
+    RIGHT_PADDING = 30
     PLUS_BTN_SIZE = 68
-    # 完成按钮的X位置：WIDTH - MARGIN - 30 - CHECK_BTN_SIZE = WIDTH - MARGIN - 30 - 58
-    # +按钮使用相同的右侧对齐逻辑
-    PLUS_BTN_X = WIDTH - MARGIN - 30 - PLUS_BTN_SIZE
+    CHECK_BTN_SIZE = 58  # 任务卡片中的按钮大小
+    
+    # 计算X坐标，使两个按钮的右边缘对齐
+    PLUS_BTN_X = WIDTH - MARGIN - RIGHT_PADDING - PLUS_BTN_SIZE
     PLUS_BTN_Y = TASK_SECTION_Y - 8
     
     draw.ellipse([PLUS_BTN_X, PLUS_BTN_Y, PLUS_BTN_X + PLUS_BTN_SIZE, PLUS_BTN_Y + PLUS_BTN_SIZE], 
                  fill=PRIMARY_COLOR)
     
-    # +号精确居中 - 使用textbbox计算精确位置
+    # +号精确居中
     plus_bbox = draw.textbbox((0, 0), "+", font=font_plus)
     plus_w = plus_bbox[2] - plus_bbox[0]
     plus_h = plus_bbox[3] - plus_bbox[1]
+    # 水平居中
     plus_x = PLUS_BTN_X + (PLUS_BTN_SIZE - plus_w) // 2
-    # 垂直居中微调 - 根据字体基线调整
-    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 2
+    # 垂直居中（微调-3像素使视觉居中）
+    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 3
     draw.text((plus_x, plus_y), "+", fill=WHITE, font=font_plus)
     
     # ===== 任务卡片列表 =====
@@ -186,9 +192,9 @@ def screenshot1_home():
         # 难度文字
         draw.text((TEXT_X, card_y + 78), difficulty, fill=GRAY, font=font_task_sub)
         
-        # 右侧完成按钮 - 垂直居中
+        # 右侧完成按钮 - 与+按钮精确对齐
         CHECK_BTN_SIZE = 58
-        CHECK_BTN_X = WIDTH - MARGIN - 30 - CHECK_BTN_SIZE
+        CHECK_BTN_X = WIDTH - MARGIN - RIGHT_PADDING - CHECK_BTN_SIZE
         CHECK_BTN_Y = card_y + (TASK_CARD_HEIGHT - CHECK_BTN_SIZE) // 2
         
         draw.ellipse([CHECK_BTN_X, CHECK_BTN_Y, CHECK_BTN_X + CHECK_BTN_SIZE, CHECK_BTN_Y + CHECK_BTN_SIZE],

@@ -15,7 +15,7 @@
 
 ---
 
-## 方案 1：AppScreens 在线工具（推荐）
+## 方案 1：AppScreens 在线工具（推荐 ⭐⭐⭐⭐⭐）
 
 ### 网址
 ```
@@ -37,7 +37,6 @@ https://appscreens.com
 
 3. **上传截图**
    - 使用手机拍摄 FocusFlow 界面照片
-   - 或者使用我之前创建的 `ScreenshotPreviews.swift` 的截图
    - 上传到 AppScreens
 
 4. **选择模板**
@@ -63,36 +62,26 @@ https://appscreens.com
 
 ---
 
-## 方案 2：Canva + 模板（设计向）
+## 方案 2：ShotBot 专业服务（推荐 ⭐⭐⭐⭐⭐）
 
 ### 网址
 ```
-https://www.canva.com
+https://shotbot.io
 ```
 
-### 使用步骤
+### 价格
+- 基础版：免费
+- 专业版：$10-30/套截图
 
-1. **搜索模板**
-   - 搜索 "App Store Screenshot"
-   - 或 "iOS App Screenshot"
-
-2. **选择尺寸**
-   ```
-   iPhone: 1290 x 2796 px
-   ```
-
-3. **自定义设计**
-   - 上传应用界面截图
-   - 添加文字说明
-   - 使用 FocusFlow 品牌色
-
-4. **导出**
-   - PNG 格式
-   - 高质量
+### 优点
+- ✅ 专业设计师模板
+- ✅ 一键生成全套截图
+- ✅ 支持多语言
+- ✅ App Store 优化
 
 ---
 
-## 方案 3：借用朋友 Mac（最真实）
+## 方案 3：借用朋友 Mac（最真实 ⭐⭐⭐⭐⭐）
 
 ### 准备工作
 
@@ -122,9 +111,9 @@ https://www.canva.com
 
 | 服务 | 网址 | 价格 | 说明 |
 |------|------|------|------|
-| MacStadium | macstadium.com | $99/月 | 专业云 Mac |
-| AWS EC2 Mac | aws.amazon.com | ~$1.5/小时 | 按小时计费 |
 | MacinCloud | macincloud.com | $1-2/小时 | 适合临时使用 |
+| AWS EC2 Mac | aws.amazon.com | ~$1.5/小时 | 按小时计费 |
+| MacStadium | macstadium.com | $99/月 | 专业云 Mac |
 
 ### 使用步骤 (MacinCloud 示例)
 
@@ -150,21 +139,6 @@ https://www.canva.com
 5. **导出截图**
    - 使用 ScreenshotPreviews.swift 导出
    - 上传到云盘或邮件发送
-
----
-
-## 方案 5：使用 Android 手机 + 模拟器截图（替代方案）
-
-如果上述方案都不可行，可以使用 **Android 截图工具**生成类似效果：
-
-### 工具
-- **Screenshot Maker Pro** (Android App)
-- **App Store Screenshot Maker** (在线)
-
-### 说明
-- 生成的是 "示意图" 而非真实截图
-- 可以用于早期推广
-- App Store 审核可能需要真实截图
 
 ---
 
@@ -204,17 +178,6 @@ App Store 审核要求：
 - ✅ 尺寸必须符合要求
 
 **建议优先使用真实截图（借用 Mac）或高质量在线工具。**
-
----
-
-## 🎯 下一步
-
-请告诉我：
-1. **您想用哪个方案？**
-2. **有可以借用 Mac 的朋友吗？**
-3. **还是打算使用在线工具？**
-
-我可以根据您的选择提供更详细的步骤指导！
 
 ---
 

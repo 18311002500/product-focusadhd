@@ -134,20 +134,23 @@ def screenshot1_home():
     # 左侧标题
     draw.text((MARGIN, TASK_SECTION_Y), "今日任务", fill=DARK_COLOR, font=font_card_title)
     
-    # 右侧+按钮
+    # 右侧+按钮 - 与任务卡片的完成按钮在同一垂直线上
     PLUS_BTN_SIZE = 68
-    PLUS_BTN_X = WIDTH - MARGIN - PLUS_BTN_SIZE
+    # 完成按钮的X位置：WIDTH - MARGIN - 30 - CHECK_BTN_SIZE = WIDTH - MARGIN - 30 - 58
+    # +按钮使用相同的右侧对齐逻辑
+    PLUS_BTN_X = WIDTH - MARGIN - 30 - PLUS_BTN_SIZE
     PLUS_BTN_Y = TASK_SECTION_Y - 8
     
     draw.ellipse([PLUS_BTN_X, PLUS_BTN_Y, PLUS_BTN_X + PLUS_BTN_SIZE, PLUS_BTN_Y + PLUS_BTN_SIZE], 
                  fill=PRIMARY_COLOR)
     
-    # +号精确居中
+    # +号精确居中 - 使用textbbox计算精确位置
     plus_bbox = draw.textbbox((0, 0), "+", font=font_plus)
     plus_w = plus_bbox[2] - plus_bbox[0]
     plus_h = plus_bbox[3] - plus_bbox[1]
     plus_x = PLUS_BTN_X + (PLUS_BTN_SIZE - plus_w) // 2
-    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 6
+    # 垂直居中微调 - 根据字体基线调整
+    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 2
     draw.text((plus_x, plus_y), "+", fill=WHITE, font=font_plus)
     
     # ===== 任务卡片列表 =====

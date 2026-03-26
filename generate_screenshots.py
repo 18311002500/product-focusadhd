@@ -149,14 +149,14 @@ def screenshot1_home():
     draw.ellipse([PLUS_BTN_X, PLUS_BTN_Y, PLUS_BTN_X + PLUS_BTN_SIZE, PLUS_BTN_Y + PLUS_BTN_SIZE], 
                  fill=PRIMARY_COLOR)
     
-    # +号精确居中
+    # +号精确居中 - 重新计算
     plus_bbox = draw.textbbox((0, 0), "+", font=font_plus)
     plus_w = plus_bbox[2] - plus_bbox[0]
     plus_h = plus_bbox[3] - plus_bbox[1]
     # 水平居中
     plus_x = PLUS_BTN_X + (PLUS_BTN_SIZE - plus_w) // 2
-    # 垂直居中（微调-3像素使视觉居中）
-    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 3
+    # 垂直居中 - 基于按钮中心点
+    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2
     draw.text((plus_x, plus_y), "+", fill=WHITE, font=font_plus)
     
     # ===== 任务卡片列表 =====

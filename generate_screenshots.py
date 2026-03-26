@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FocusFlow App Store 截图自动生成脚本
+FocusFlow App Store 截图自动生成脚本 - 修复版
 完全自动化，无需人工介入
 """
 
@@ -19,39 +19,19 @@ DANGER_COLOR = (233, 30, 99)  # #E91E63 - 粉色
 DARK_COLOR = (44, 62, 80)  # #2C3E50 - 深蓝灰
 LIGHT_BG = (247, 247, 247)  # #F7F7F7 - 浅灰背景
 WHITE = (255, 255, 255)
-
-def create_gradient_background(draw, width, height, color1, color2):
-    """创建渐变背景"""
-    for y in range(height):
-        r = int(color1[0] + (color2[0] - color1[0]) * y / height)
-        g = int(color1[1] + (color2[1] - color1[1]) * y / height)
-        b = int(color1[2] + (color2[2] - color1[2]) * y / height)
-        draw.line([(0, y), (width, y)], fill=(r, g, b))
+BLACK = (0, 0, 0)
 
 def draw_rounded_rect(draw, xy, radius, fill, outline=None):
     """绘制圆角矩形"""
-    x1, y1, x2, y2 = xy
     draw.rounded_rectangle(xy, radius=radius, fill=fill, outline=outline)
-
-def draw_circle_progress(draw, center, radius, progress, color, bg_color):
-    """绘制圆形进度条"""
-    x, y = center
-    # 背景圆
-    draw.ellipse([x-radius, y-radius, x+radius, y+radius], outline=bg_color, width=20)
-    # 进度弧（简化版）
-    import math
-    start_angle = -90
-    end_angle = start_angle + (360 * progress)
-    draw.pieslice([x-radius, y-radius, x+radius, y+radius], start=start_angle, end=end_angle, fill=color)
 
 def get_font(size):
     """获取字体 - 优先使用支持中文的字体"""
     font_paths = [
-        "/tmp/NotoSansCJKsc-Bold.otf",  # 下载的中文支持字体
+        "/tmp/NotoSansCJKsc-Bold.otf",
         "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-        "/System/Library/Fonts/PingFang.ttc",  # macOS 中文字体
+        "/System/Library/Fonts/PingFang.ttc",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/System/Library/Fonts/Helvetica.ttc",
     ]
     
     for path in font_paths:
@@ -62,38 +42,79 @@ def get_font(size):
     
     return ImageFont.load_default()
 
+# 用彩色圆形代替 emoji
+def draw_icon(draw, x, y, size, icon_type, color):
+    """绘制图标（代替 emoji）"""
+    if icon_type == "plant":  # 🌱 幼苗
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=SUCCESS_COLOR)
+        draw.text((x-size//4, y-size//3), "P", fill=WHITE, font=get_font(size//2))
+    elif icon_type == "fire":  # 🔥 连续
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=DANGER_COLOR)
+        draw.text((x-size//4, y-size//3), "F", fill=WHITE, font=get_font(size//2))
+    elif icon_type == "star":  # ⭐ 积分
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=PRIMARY_COLOR)
+        draw.text((x-size//4, y-size//3), "S", fill=WHITE, font=get_font(size//2))
+    elif icon_type == "run":  # 🏃 运动
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=(200, 200, 200))
+        draw.text((x-size//4, y-size//3), "R", fill=(150, 150, 150), font=get_font(size//2))
+    elif icon_type == "target":  # 🎯 专注
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=(200, 200, 200))
+        draw.text((x-size//4, y-size//3), "T", fill=(150, 150, 150), font=get_font(size//2))
+    elif icon_type == "gem":  # 💎 收藏
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=(200, 200, 200))
+        draw.text((x-size//4, y-size//3), "G", fill=(150, 150, 150), font=get_font(size//2))
+    elif icon_type == "bird":  # 🐦 早起
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=(200, 200, 200))
+        draw.text((x-size//4, y-size//3), "B", fill=(150, 150, 150), font=get_font(size//2))
+    elif icon_type == "book":  # 📚 学习
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=(200, 200, 200))
+        draw.text((x-size//4, y-size//3), "L", fill=(150, 150, 150), font=get_font(size//2))
+    elif icon_type == "check":  # ✅ 完成
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=SUCCESS_COLOR)
+        draw.text((x-size//4, y-size//3), "✓", fill=WHITE, font=get_font(size//2))
+    elif icon_type == "lock":  # 🔒 锁定
+        draw.ellipse([x-size//2, y-size//2, x+size//2, y+size//2], fill=(200, 200, 200))
+        draw.text((x-size//4, y-size//3), "L", fill=(150, 150, 150), font=get_font(size//2))
+
 def screenshot1_home():
     """截图 1: 首页 - 今日任务"""
     img = Image.new('RGB', (WIDTH, HEIGHT), LIGHT_BG)
     draw = ImageDraw.Draw(img)
     
     font_large = get_font(64)
-    font_medium = get_font(48)
-    font_small = get_font(36)
-    font_title = get_font(56)
+    font_medium = get_font(44)
+    font_small = get_font(32)
+    font_title = get_font(52)
     
     # 标题栏
     draw.text((60, 120), "FocusFlow", fill=DARK_COLOR, font=font_large)
     
     # 植物成长卡片
     card_y = 240
-    draw_rounded_rect(draw, (60, card_y, WIDTH-60, card_y+280), 30, WHITE)
-    draw.text((100, card_y+40), "我的植物", fill=(128, 128, 128), font=font_small)
-    draw.text((100, card_y+100), "幼苗期 🌱", fill=DARK_COLOR, font=font_title)
+    draw_rounded_rect(draw, (60, card_y, WIDTH-60, card_y+260), 30, WHITE)
+    draw.text((100, card_y+30), "我的植物", fill=(128, 128, 128), font=font_small)
+    
+    # 用图标代替 emoji
+    draw.ellipse([WIDTH-180, card_y+30, WIDTH-100, card_y+110], fill=SUCCESS_COLOR)
+    draw.text((WIDTH-155, card_y+50), "P", fill=WHITE, font=font_medium)
+    
+    draw.text((100, card_y+85), "幼苗期", fill=DARK_COLOR, font=font_title)
     
     # 进度条
-    bar_y = card_y + 200
-    draw_rounded_rect(draw, (100, bar_y, WIDTH-100, bar_y+24), 12, (230, 230, 230))
-    draw_rounded_rect(draw, (100, bar_y, 100+int((WIDTH-200)*0.75), bar_y+24), 12, SUCCESS_COLOR)
-    draw.text((100, bar_y-50), "1250 能量点", fill=(128, 128, 128), font=font_small)
-    draw.text((WIDTH-300, bar_y-50), "还需 250 点升级", fill=(128, 128, 128), font=font_small)
+    bar_y = card_y + 180
+    draw_rounded_rect(draw, (100, bar_y, WIDTH-100, bar_y+20), 10, (230, 230, 230))
+    draw_rounded_rect(draw, (100, bar_y, 100+int((WIDTH-200)*0.75), bar_y+20), 10, SUCCESS_COLOR)
+    
+    # 积分文字
+    draw.text((100, bar_y-40), "1250 能量点", fill=(128, 128, 128), font=font_small)
+    draw.text((WIDTH-280, bar_y-40), "还需 250 点升级", fill=(128, 128, 128), font=font_small)
     
     # 今日任务标题
-    task_y = 580
+    task_y = 560
     draw.text((60, task_y), "今日任务", fill=DARK_COLOR, font=font_title)
     # 添加按钮
     draw.ellipse([WIDTH-140, task_y, WIDTH-60, task_y+80], fill=PRIMARY_COLOR)
-    draw.text((WIDTH-115, task_y+15), "+", fill=WHITE, font=font_large)
+    draw.text((WIDTH-108, task_y+12), "+", fill=WHITE, font=font_large)
     
     # 任务卡片
     tasks = [
@@ -104,26 +125,25 @@ def screenshot1_home():
     
     card_y = 680
     for task, diff, color in tasks:
-        draw_rounded_rect(draw, (60, card_y, WIDTH-60, card_y+140), 20, WHITE)
+        draw_rounded_rect(draw, (60, card_y, WIDTH-60, card_y+130), 20, WHITE)
         # 难度指示点
-        draw.ellipse([100, card_y+55, 124, card_y+79], fill=color)
-        draw.text((160, card_y+35), task, fill=DARK_COLOR, font=font_medium)
-        draw.text((160, card_y+85), diff, fill=(128, 128, 128), font=font_small)
+        draw.ellipse([100, card_y+50, 130, card_y+80], fill=color)
+        draw.text((160, card_y+30), task, fill=DARK_COLOR, font=font_medium)
+        draw.text((160, card_y+75), diff, fill=(128, 128, 128), font=font_small)
         # 完成按钮
-        draw.ellipse([WIDTH-140, card_y+35, WIDTH-80, card_y+95], fill=SUCCESS_COLOR)
-        draw.text((WIDTH-122, card_y+45), "✓", fill=WHITE, font=font_medium)
-        card_y += 170
+        draw.ellipse([WIDTH-130, card_y+35, WIDTH-70, card_y+95], fill=SUCCESS_COLOR)
+        draw.text((WIDTH-108, card_y+48), "✓", fill=WHITE, font=font_medium)
+        card_y += 160
     
-    # 底部 Tab Bar
+    # 底部 Tab Bar - 使用文字代替 emoji
     tab_y = HEIGHT - 140
     draw.rectangle([0, tab_y, WIDTH, HEIGHT], fill=WHITE)
-    tabs = [("📋", "今日", True), ("⏱️", "专注", False), ("📊", "进度", False), ("🏆", "徽章", False)]
+    tabs = [("今日", True), ("专注", False), ("进度", False), ("徽章", False)]
     tab_width = WIDTH // 4
-    for i, (icon, label, selected) in enumerate(tabs):
+    for i, (label, selected) in enumerate(tabs):
         x = i * tab_width + tab_width // 2
         color = PRIMARY_COLOR if selected else (128, 128, 128)
-        draw.text((x-30, tab_y+20), icon, fill=color, font=font_medium)
-        draw.text((x-40, tab_y+80), label, fill=color, font=font_small)
+        draw.text((x-40, tab_y+40), label, fill=color, font=font_medium)
     
     return img
 
@@ -134,8 +154,8 @@ def screenshot2_timer():
     
     font_large = get_font(64)
     font_huge = get_font(120)
-    font_medium = get_font(48)
-    font_small = get_font(36)
+    font_medium = get_font(44)
+    font_small = get_font(32)
     
     # 标题
     draw.text((60, 120), "专注计时", fill=DARK_COLOR, font=font_large)
@@ -149,24 +169,31 @@ def screenshot2_timer():
                  outline=(230, 230, 230), width=20)
     
     # 进度弧（60% 进度）
+    # 绘制圆弧使用 pieslice
     draw.pieslice([center_x-radius, center_y-radius, center_x+radius, center_y+radius],
                   start=-90, end=126, fill=PRIMARY_COLOR)
+    # 绘制内圆遮盖中心，只保留圆环
+    inner_radius = radius - 20
+    draw.ellipse([center_x-inner_radius, center_y-inner_radius, 
+                  center_x+inner_radius, center_y+inner_radius], fill=LIGHT_BG)
     
     # 中心文字
-    draw.text((center_x-180, center_y-80), "09:42", fill=DARK_COLOR, font=font_huge)
-    draw.text((center_x-80, center_y+80), "专注中...", fill=SUCCESS_COLOR, font=font_medium)
+    draw.text((center_x-165, center_y-80), "09:42", fill=DARK_COLOR, font=font_huge)
+    draw.text((center_x-90, center_y+70), "专注中...", fill=SUCCESS_COLOR, font=font_medium)
     
     # 控制按钮
-    button_y = HEIGHT - 300
-    buttons = [("⏸", PRIMARY_COLOR), ("⏹", DANGER_COLOR), ("✓", SUCCESS_COLOR)]
-    button_spacing = 200
+    button_y = HEIGHT - 350
+    buttons = [("暂停", PRIMARY_COLOR), ("停止", DANGER_COLOR), ("完成", SUCCESS_COLOR)]
+    button_spacing = 220
     start_x = (WIDTH - (len(buttons)-1) * button_spacing) // 2
     
-    for i, (icon, color) in enumerate(buttons):
+    for i, (label, color) in enumerate(buttons):
         x = start_x + i * button_spacing
-        draw.ellipse([x-60, button_y-60, x+60, button_y+60], fill=(*color, 40))
-        draw.ellipse([x-50, button_y-50, x+50, button_y+50], fill=color)
-        draw.text((x-20, button_y-30), icon, fill=WHITE, font=font_medium)
+        # 按钮背景
+        draw.ellipse([x-70, button_y-70, x+70, button_y+70], fill=(*color, 40) if len(color) == 3 else color)
+        # 按钮
+        draw.ellipse([x-60, button_y-60, x+60, button_y+60], fill=color)
+        draw.text((x-50, button_y-25), label, fill=WHITE, font=font_small)
     
     return img
 
@@ -176,8 +203,8 @@ def screenshot3_badges():
     draw = ImageDraw.Draw(img)
     
     font_large = get_font(64)
-    font_medium = get_font(48)
-    font_small = get_font(36)
+    font_medium = get_font(44)
+    font_small = get_font(32)
     
     # 标题
     draw.text((60, 120), "徽章墙", fill=DARK_COLOR, font=font_large)
@@ -185,38 +212,49 @@ def screenshot3_badges():
     
     # 徽章网格
     badges = [
-        ("🌱", "初次萌芽", True),
-        ("🔥", "连续3天", True),
-        ("⭐", "积分别致", True),
-        ("🏃", "运动达人", False),
-        ("🎯", "专注大师", False),
-        ("💎", "任务收藏家", False),
-        ("🌟", "早起鸟", False),
-        ("📚", "学习达人", False),
+        ("plant", "初次萌芽", True),
+        ("fire", "连续3天", True),
+        ("star", "积分别致", True),
+        ("run", "运动达人", False),
+        ("target", "专注大师", False),
+        ("gem", "任务收藏家", False),
+        ("bird", "早起鸟", False),
+        ("book", "学习达人", False),
     ]
     
     cols = 2
-    badge_width = (WIDTH - 120) // cols
+    badge_width = (WIDTH - 180) // cols
     badge_height = 200
     start_y = 320
     
-    for i, (icon, name, unlocked) in enumerate(badges):
+    for i, (icon_type, name, unlocked) in enumerate(badges):
         row = i // cols
         col = i % cols
-        x = 60 + col * badge_width
+        x = 60 + col * (badge_width + 20)
         y = start_y + row * (badge_height + 20)
         
         bg_color = (255, 243, 224) if unlocked else (240, 240, 240)
-        draw_rounded_rect(draw, (x, y, x+badge_width-20, y+badge_height), 20, bg_color)
+        text_color = DARK_COLOR if unlocked else (180, 180, 180)
         
-        opacity = 255 if unlocked else 128
-        # 绘制表情符号（用简单图形代替）
+        draw_rounded_rect(draw, (x, y, x+badge_width, y+badge_height), 20, bg_color)
+        
+        # 绘制图标
+        icon_color = SUCCESS_COLOR if unlocked else (180, 180, 180)
         if unlocked:
-            draw.text((x+badge_width//2-50, y+30), icon, fill=DARK_COLOR, font=font_large)
-            draw.text((x+40, y+130), name, fill=DARK_COLOR, font=font_small)
+            if icon_type == "plant":
+                draw.ellipse([x+badge_width//2-40, y+30, x+badge_width//2+40, y+110], fill=SUCCESS_COLOR)
+                draw.text((x+badge_width//2-20, y+50), "P", fill=WHITE, font=font_medium)
+            elif icon_type == "fire":
+                draw.ellipse([x+badge_width//2-40, y+30, x+badge_width//2+40, y+110], fill=DANGER_COLOR)
+                draw.text((x+badge_width//2-20, y+50), "F", fill=WHITE, font=font_medium)
+            elif icon_type == "star":
+                draw.ellipse([x+badge_width//2-40, y+30, x+badge_width//2+40, y+110], fill=PRIMARY_COLOR)
+                draw.text((x+badge_width//2-20, y+50), "S", fill=WHITE, font=font_medium)
         else:
-            draw.text((x+badge_width//2-50, y+30), "🔒", fill=(180, 180, 180), font=font_large)
-            draw.text((x+40, y+130), name, fill=(180, 180, 180), font=font_small)
+            draw.ellipse([x+badge_width//2-40, y+30, x+badge_width//2+40, y+110], fill=(200, 200, 200))
+            draw.text((x+badge_width//2-20, y+50), "L", fill=(150, 150, 150), font=font_medium)
+        
+        draw.text((x+badge_width//2-len(name)*22, y+130), name, fill=text_color, font=font_small)
     
     return img
 
@@ -227,43 +265,45 @@ def screenshot4_progress():
     
     font_large = get_font(64)
     font_huge = get_font(100)
-    font_medium = get_font(48)
-    font_small = get_font(36)
+    font_medium = get_font(44)
+    font_small = get_font(32)
     
     # 标题
     draw.text((60, 120), "进度", fill=DARK_COLOR, font=font_large)
     
     # 本周完成率卡片
     card_y = 240
-    draw_rounded_rect(draw, (60, card_y, WIDTH-60, card_y+300), 30, WHITE)
+    draw_rounded_rect(draw, (60, card_y, WIDTH-60, card_y+280), 30, WHITE)
     draw.text((100, card_y+40), "本周完成率", fill=(128, 128, 128), font=font_small)
     draw.text((100, card_y+100), "78%", fill=SUCCESS_COLOR, font=font_huge)
-    draw.text((100, card_y+220), "比上周提升 12%", fill=(128, 128, 128), font=font_small)
+    draw.text((100, card_y+210), "比上周提升 12%", fill=(128, 128, 128), font=font_small)
     
     # 统计数据行
-    stats_y = 580
+    stats_y = 560
     stats = [("总积分", "1,250", PRIMARY_COLOR), ("连续打卡", "5天", SECONDARY_COLOR)]
     stat_width = (WIDTH - 140) // 2
     
     for i, (label, value, color) in enumerate(stats):
         x = 60 + i * (stat_width + 20)
-        draw_rounded_rect(draw, (x, stats_y, x+stat_width, stats_y+200), 20, WHITE)
+        draw_rounded_rect(draw, (x, stats_y, x+stat_width, stats_y+180), 20, WHITE)
         draw.text((x+30, stats_y+30), label, fill=(128, 128, 128), font=font_small)
-        draw.text((x+30, stats_y+90), value, fill=color, font=font_huge)
+        draw.text((x+30, stats_y+80), value, fill=color, font=font_huge)
     
     # 植物成长阶段
-    stage_y = 820
-    draw_rounded_rect(draw, (60, stage_y, WIDTH-60, stage_y+280), 30, WHITE)
+    stage_y = 780
+    draw_rounded_rect(draw, (60, stage_y, WIDTH-60, stage_y+240), 30, WHITE)
     draw.text((100, stage_y+40), "植物成长阶段", fill=DARK_COLOR, font=font_medium)
     
-    stages = ["🌱", "🌿", "🌳", "🌸", "🍎"]
-    stage_width = (WIDTH - 200) // len(stages)
-    for i, stage in enumerate(stages):
-        x = 100 + i * stage_width
-        active = i == 0
+    stages = [("幼苗", True), ("成长", False), ("茂盛", False), ("开花", False), ("结果", False)]
+    stage_width = (WIDTH - 280) // len(stages)
+    for i, (stage, active) in enumerate(stages):
+        x = 120 + i * stage_width
         color = SUCCESS_COLOR if active else (200, 200, 200)
-        draw.text((x, stage_y+120), stage, fill=DARK_COLOR if active else (180, 180, 180), font=font_large)
-        draw.ellipse([x+40, stage_y+220, x+60, stage_y+240], fill=color)
+        # 绘制圆形图标
+        draw.ellipse([x+stage_width//2-40, stage_y+100, x+stage_width//2+40, stage_y+180], fill=color)
+        draw.text((x+stage_width//2-35, stage_y+120), stage[0], fill=WHITE, font=font_medium)
+        # 阶段名称
+        draw.text((x+stage_width//2-35, stage_y+195), stage, fill=color, font=font_small)
     
     return img
 
@@ -273,56 +313,56 @@ def screenshot5_add_task():
     draw = ImageDraw.Draw(img)
     
     # 背景遮罩
-    draw.rectangle([0, 0, WIDTH, HEIGHT], fill=(0, 0, 0, 100))
+    draw.rectangle([0, 0, WIDTH, HEIGHT], fill=(0, 0, 0, 80))
     
     font_large = get_font(56)
-    font_medium = get_font(44)
-    font_small = get_font(36)
+    font_medium = get_font(40)
+    font_small = get_font(32)
     
-    # 弹窗
+    # 弹窗 - 居中显示完整
     dialog_margin = 80
-    dialog_y = 400
-    dialog_height = 800
+    dialog_y = 500
+    dialog_height = 900
     draw_rounded_rect(draw, (dialog_margin, dialog_y, WIDTH-dialog_margin, dialog_y+dialog_height), 30, WHITE)
     
     # 标题
-    draw.text((WIDTH//2-120, dialog_y+60), "添加任务", fill=DARK_COLOR, font=font_large)
+    draw.text((WIDTH//2-100, dialog_y+50), "添加任务", fill=DARK_COLOR, font=font_large)
     
     # 任务名称输入
-    input_y = dialog_y + 180
+    input_y = dialog_y + 150
     draw.text((dialog_margin+40, input_y), "任务名称", fill=DARK_COLOR, font=font_medium)
-    draw_rounded_rect(draw, (dialog_margin+40, input_y+70, WIDTH-dialog_margin-40, input_y+150), 15, (240, 240, 240))
-    draw.text((dialog_margin+70, input_y+85), "完成项目报告", fill=DARK_COLOR, font=font_medium)
+    draw_rounded_rect(draw, (dialog_margin+40, input_y+60, WIDTH-dialog_margin-40, input_y+130), 15, (240, 240, 240))
+    draw.text((dialog_margin+70, input_y+80), "完成项目报告", fill=DARK_COLOR, font=font_medium)
     
     # 难度选择
-    diff_y = input_y + 220
+    diff_y = input_y + 200
     draw.text((dialog_margin+40, diff_y), "任务难度", fill=DARK_COLOR, font=font_medium)
     
     difficulties = [("简单", SECONDARY_COLOR, False), ("中等", PRIMARY_COLOR, False), ("困难", DANGER_COLOR, True)]
-    diff_width = (WIDTH - dialog_margin*2 - 120) // 3
+    diff_width = (WIDTH - dialog_margin*2 - 100) // 3
     for i, (label, color, selected) in enumerate(difficulties):
-        x = dialog_margin + 40 + i * (diff_width + 30)
+        x = dialog_margin + 40 + i * (diff_width + 25)
         bg = color if selected else (240, 240, 240)
         text_color = WHITE if selected else color
-        draw_rounded_rect(draw, (x, diff_y+70, x+diff_width, diff_y+150), 15, bg)
-        draw.text((x+diff_width//2-40, diff_y+90), label, fill=text_color, font=font_small)
+        draw_rounded_rect(draw, (x, diff_y+60, x+diff_width, diff_y+130), 15, bg)
+        draw.text((x+diff_width//2-35, diff_y+80), label, fill=text_color, font=font_small)
     
-    # 积分预览
-    reward_y = diff_y + 220
+    # 积分预览 - 修复重叠问题
+    reward_y = diff_y + 200
     draw.text((dialog_margin+40, reward_y), "完成奖励:", fill=DARK_COLOR, font=font_medium)
-    draw.text((WIDTH-dialog_margin-250, reward_y), "+30 积分", fill=SUCCESS_COLOR, font=font_medium)
+    draw.text((WIDTH-dialog_margin-200, reward_y), "+30 积分", fill=SUCCESS_COLOR, font=font_medium)
     
     # 按钮
     button_y = dialog_y + dialog_height - 150
     button_width = (WIDTH - dialog_margin*2 - 60) // 2
     
     # 取消按钮
-    draw_rounded_rect(draw, (dialog_margin+40, button_y, dialog_margin+40+button_width, button_y+100), 15, (230, 230, 230))
-    draw.text((dialog_margin+40+button_width//2-50, button_y+30), "取消", fill=DARK_COLOR, font=font_medium)
+    draw_rounded_rect(draw, (dialog_margin+40, button_y, dialog_margin+40+button_width, button_y+90), 15, (230, 230, 230))
+    draw.text((dialog_margin+40+button_width//2-40, button_y+30), "取消", fill=DARK_COLOR, font=font_medium)
     
     # 添加按钮
-    draw_rounded_rect(draw, (dialog_margin+60+button_width, button_y, WIDTH-dialog_margin-40, button_y+100), 15, PRIMARY_COLOR)
-    draw.text((dialog_margin+60+button_width+button_width//2-50, button_y+30), "添加", fill=WHITE, font=font_medium)
+    draw_rounded_rect(draw, (dialog_margin+60+button_width, button_y, WIDTH-dialog_margin-40, button_y+90), 15, PRIMARY_COLOR)
+    draw.text((dialog_margin+60+button_width+button_width//2-40, button_y+30), "添加", fill=WHITE, font=font_medium)
     
     return img
 

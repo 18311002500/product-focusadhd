@@ -45,75 +45,110 @@ def draw_centered_text(draw, text, center_x, center_y, font, fill):
     draw.text((x, y), text, fill=fill, font=font)
 
 def screenshot1_home():
-    """截图 1: 首页 - 今日任务 - 最终版"""
+    """截图 1: 首页 - 今日任务 - 像素级精确版"""
     img = Image.new('RGB', (WIDTH, HEIGHT), LIGHT_BG)
     draw = ImageDraw.Draw(img)
     
-    font_title = get_font(72)
-    font_card_title = get_font(48)
-    font_card_subtitle = get_font(36)
-    font_task = get_font(42)
-    font_task_sub = get_font(32)
-    font_tab = get_font(36)
-    font_icon = get_font(40)
-    font_plus = get_font(60)
-    font_check = get_font(36)
+    # 字体定义
+    font_title = get_font(72)           # FocusFlow标题
+    font_card_title = get_font(48)      # 卡片大标题
+    font_card_subtitle = get_font(36)   # 卡片小标题
+    font_task = get_font(42)            # 任务名称
+    font_task_sub = get_font(32)        # 任务难度
+    font_tab = get_font(36)             # Tab文字
+    font_icon = get_font(44)            # 图标字母
+    font_plus = get_font(56)            # +号
+    font_check = get_font(32)           # 对勾
+    font_points = get_font(30)          # 积分文字
     
-    margin = 60
+    # 全局边距
+    MARGIN = 60
+    CARD_RADIUS = 25
     
-    # 标题栏
-    draw.text((margin, 100), "FocusFlow", fill=DARK_COLOR, font=font_title)
+    # ===== 顶部标题 =====
+    TITLE_Y = 90
+    draw.text((MARGIN, TITLE_Y), "FocusFlow", fill=DARK_COLOR, font=font_title)
     
     # ===== 植物成长卡片 =====
-    card_y = 220
-    card_height = 260
+    PLANT_CARD_Y = 200
+    PLANT_CARD_HEIGHT = 240
+    PLANT_CARD_PADDING = 35
     
+    # 卡片背景
     draw.rounded_rectangle(
-        [margin, card_y, WIDTH-margin, card_y+card_height], 
-        radius=30, fill=WHITE
+        [MARGIN, PLANT_CARD_Y, WIDTH - MARGIN, PLANT_CARD_Y + PLANT_CARD_HEIGHT],
+        radius=CARD_RADIUS, fill=WHITE
     )
     
-    # 左侧文字
-    text_x = margin + 40
-    draw.text((text_x, card_y + 40), "我的植物", fill=GRAY, font=font_card_subtitle)
-    draw.text((text_x, card_y + 95), "幼苗期", fill=DARK_COLOR, font=font_card_title)
+    # 左侧文字区域
+    LEFT_TEXT_X = MARGIN + PLANT_CARD_PADDING
     
-    # 右侧图标：绿色圆形 + P 居中
-    icon_size = 90
-    icon_x = WIDTH - margin - 40 - icon_size
-    icon_y = card_y + 40
+    # "我的植物" - 小字灰色
+    draw.text((LEFT_TEXT_X, PLANT_CARD_Y + 30), "我的植物", fill=GRAY, font=font_card_subtitle)
     
-    draw.ellipse([icon_x, icon_y, icon_x+icon_size, icon_y+icon_size], fill=SUCCESS_COLOR)
-    draw_centered_text(draw, "P", icon_x + icon_size//2, icon_y + icon_size//2 - 3, font_icon, WHITE)
+    # "幼苗期" - 大字黑色
+    draw.text((LEFT_TEXT_X, PLANT_CARD_Y + 80), "幼苗期", fill=DARK_COLOR, font=font_card_title)
+    
+    # 右侧P图标 - 精确居中于右侧区域
+    ICON_SIZE = 85
+    ICON_X = WIDTH - MARGIN - PLANT_CARD_PADDING - ICON_SIZE
+    ICON_Y = PLANT_CARD_Y + 35
+    
+    # 绿色圆形背景
+    draw.ellipse([ICON_X, ICON_Y, ICON_X + ICON_SIZE, ICON_Y + ICON_SIZE], fill=SUCCESS_COLOR)
+    
+    # P字母精确居中
+    p_bbox = draw.textbbox((0, 0), "P", font=font_icon)
+    p_w = p_bbox[2] - p_bbox[0]
+    p_h = p_bbox[3] - p_bbox[1]
+    p_x = ICON_X + (ICON_SIZE - p_w) // 2
+    p_y = ICON_Y + (ICON_SIZE - p_h) // 2 - 3
+    draw.text((p_x, p_y), "P", fill=WHITE, font=font_icon)
     
     # 进度条
-    bar_y = card_y + 180
-    bar_height = 20
-    bar_width = WIDTH - margin*2 - 80
-    bar_x = margin + 40
+    BAR_Y = PLANT_CARD_Y + 165
+    BAR_HEIGHT = 18
+    BAR_WIDTH = WIDTH - MARGIN * 2 - PLANT_CARD_PADDING * 2
+    BAR_X = MARGIN + PLANT_CARD_PADDING
     
-    draw.rounded_rectangle([bar_x, bar_y, bar_x+bar_width, bar_y+bar_height], radius=10, fill=(230, 230, 230))
-    draw.rounded_rectangle([bar_x, bar_y, bar_x+int(bar_width*0.75), bar_y+bar_height], radius=10, fill=SUCCESS_COLOR)
+    # 灰色背景条
+    draw.rounded_rectangle([BAR_X, BAR_Y, BAR_X + BAR_WIDTH, BAR_Y + BAR_HEIGHT], 
+                          radius=9, fill=(230, 230, 230))
+    # 绿色进度条 (75%)
+    draw.rounded_rectangle([BAR_X, BAR_Y, BAR_X + int(BAR_WIDTH * 0.75), BAR_Y + BAR_HEIGHT], 
+                          radius=9, fill=SUCCESS_COLOR)
     
-    # 积分文字
-    draw.text((bar_x, bar_y + 40), "1250 能量点", fill=GRAY, font=font_task_sub)
+    # 积分文字 - 左右分布
+    POINTS_Y = BAR_Y + 35
+    draw.text((BAR_X, POINTS_Y), "1250 能量点", fill=GRAY, font=font_points)
     
+    # 右侧文字计算宽度后右对齐
     right_text = "还需 250 点升级"
-    rt_bbox = draw.textbbox((0, 0), right_text, font=font_task_sub)
-    rt_width = rt_bbox[2] - rt_bbox[0]
-    draw.text((WIDTH - margin - 40 - rt_width, bar_y + 40), right_text, fill=GRAY, font=font_task_sub)
+    rt_bbox = draw.textbbox((0, 0), right_text, font=font_points)
+    rt_w = rt_bbox[2] - rt_bbox[0]
+    draw.text((BAR_X + BAR_WIDTH - rt_w, POINTS_Y), right_text, fill=GRAY, font=font_points)
     
-    # ===== 今日任务标题行 =====
-    section_y = card_y + card_height + 70
-    draw.text((margin, section_y), "今日任务", fill=DARK_COLOR, font=font_card_title)
+    # ===== 今日任务标题区域 =====
+    TASK_SECTION_Y = PLANT_CARD_Y + PLANT_CARD_HEIGHT + 60
     
-    # 添加按钮 (+) 居右
-    btn_size = 72
-    btn_x = WIDTH - margin - btn_size
-    btn_y = section_y - 10
+    # 左侧标题
+    draw.text((MARGIN, TASK_SECTION_Y), "今日任务", fill=DARK_COLOR, font=font_card_title)
     
-    draw.ellipse([btn_x, btn_y, btn_x+btn_size, btn_y+btn_size], fill=PRIMARY_COLOR)
-    draw_centered_text(draw, "+", btn_x + btn_size//2, btn_y + btn_size//2 - 5, font_plus, WHITE)
+    # 右侧+按钮
+    PLUS_BTN_SIZE = 68
+    PLUS_BTN_X = WIDTH - MARGIN - PLUS_BTN_SIZE
+    PLUS_BTN_Y = TASK_SECTION_Y - 8
+    
+    draw.ellipse([PLUS_BTN_X, PLUS_BTN_Y, PLUS_BTN_X + PLUS_BTN_SIZE, PLUS_BTN_Y + PLUS_BTN_SIZE], 
+                 fill=PRIMARY_COLOR)
+    
+    # +号精确居中
+    plus_bbox = draw.textbbox((0, 0), "+", font=font_plus)
+    plus_w = plus_bbox[2] - plus_bbox[0]
+    plus_h = plus_bbox[3] - plus_bbox[1]
+    plus_x = PLUS_BTN_X + (PLUS_BTN_SIZE - plus_w) // 2
+    plus_y = PLUS_BTN_Y + (PLUS_BTN_SIZE - plus_h) // 2 - 6
+    draw.text((plus_x, plus_y), "+", fill=WHITE, font=font_plus)
     
     # ===== 任务卡片列表 =====
     tasks = [
@@ -122,45 +157,70 @@ def screenshot1_home():
         ("阅读 30 分钟", "中等", PRIMARY_COLOR),
     ]
     
-    card_y = section_y + 100
-    card_height = 140
+    TASK_CARD_Y = TASK_SECTION_Y + 90
+    TASK_CARD_HEIGHT = 135
+    TASK_CARD_GAP = 18
     
-    for task_name, difficulty, color in tasks:
-        draw.rounded_rectangle([margin, card_y, WIDTH-margin, card_y+card_height], radius=20, fill=WHITE)
+    for i, (task_name, difficulty, color) in enumerate(tasks):
+        card_y = TASK_CARD_Y + i * (TASK_CARD_HEIGHT + TASK_CARD_GAP)
         
-        # 难度指示点（垂直居中）
-        dot_size = 24
-        dot_x = margin + 35
-        dot_y = card_y + (card_height - dot_size) // 2
-        draw.ellipse([dot_x, dot_y, dot_x+dot_size, dot_y+dot_size], fill=color)
+        # 卡片背景
+        draw.rounded_rectangle([MARGIN, card_y, WIDTH - MARGIN, card_y + TASK_CARD_HEIGHT],
+                              radius=18, fill=WHITE)
         
-        # 任务名称和难度
-        text_x = dot_x + dot_size + 30
-        draw.text((text_x, card_y + 28), task_name, fill=DARK_COLOR, font=font_task)
-        draw.text((text_x, card_y + 83), difficulty, fill=GRAY, font=font_task_sub)
+        # 左侧难度指示点 - 垂直居中
+        DOT_SIZE = 22
+        DOT_X = MARGIN + 30
+        DOT_Y = card_y + (TASK_CARD_HEIGHT - DOT_SIZE) // 2
+        draw.ellipse([DOT_X, DOT_Y, DOT_X + DOT_SIZE, DOT_Y + DOT_SIZE], fill=color)
         
-        # 完成按钮（垂直居中）
-        btn_size = 64
-        btn_x = WIDTH - margin - 35 - btn_size
-        btn_y = card_y + (card_height - btn_size) // 2
+        # 任务信息区域
+        TEXT_X = DOT_X + DOT_SIZE + 25
         
-        draw.ellipse([btn_x, btn_y, btn_x+btn_size, btn_y+btn_size], fill=SUCCESS_COLOR)
-        draw_centered_text(draw, "✓", btn_x + btn_size//2, btn_y + btn_size//2 - 3, font_check, WHITE)
+        # 任务名称
+        draw.text((TEXT_X, card_y + 25), task_name, fill=DARK_COLOR, font=font_task)
         
-        card_y += card_height + 20
+        # 难度文字
+        draw.text((TEXT_X, card_y + 78), difficulty, fill=GRAY, font=font_task_sub)
+        
+        # 右侧完成按钮 - 垂直居中
+        CHECK_BTN_SIZE = 58
+        CHECK_BTN_X = WIDTH - MARGIN - 30 - CHECK_BTN_SIZE
+        CHECK_BTN_Y = card_y + (TASK_CARD_HEIGHT - CHECK_BTN_SIZE) // 2
+        
+        draw.ellipse([CHECK_BTN_X, CHECK_BTN_Y, CHECK_BTN_X + CHECK_BTN_SIZE, CHECK_BTN_Y + CHECK_BTN_SIZE],
+                     fill=SUCCESS_COLOR)
+        
+        # 对勾精确居中
+        check_bbox = draw.textbbox((0, 0), "✓", font=font_check)
+        check_w = check_bbox[2] - check_bbox[0]
+        check_h = check_bbox[3] - check_bbox[1]
+        check_x = CHECK_BTN_X + (CHECK_BTN_SIZE - check_w) // 2
+        check_y = CHECK_BTN_Y + (CHECK_BTN_SIZE - check_h) // 2 - 2
+        draw.text((check_x, check_y), "✓", fill=WHITE, font=font_check)
     
     # ===== 底部 Tab Bar =====
-    tab_height = 130
-    tab_y = HEIGHT - tab_height
-    draw.rectangle([0, tab_y, WIDTH, HEIGHT], fill=WHITE)
+    TAB_HEIGHT = 120
+    TAB_Y = HEIGHT - TAB_HEIGHT
     
-    tabs = [("今日", True), ("专注", False), ("进度", False), ("徽章", False)]
+    draw.rectangle([0, TAB_Y, WIDTH, HEIGHT], fill=WHITE)
+    
+    # Tab项目
+    tabs = ["今日", "专注", "进度", "徽章"]
     tab_width = WIDTH // 4
     
-    for i, (label, selected) in enumerate(tabs):
-        center_x = i * tab_width + tab_width // 2
-        color = PRIMARY_COLOR if selected else GRAY
-        draw_centered_text(draw, label, center_x, tab_y + tab_height//2, font_tab, color)
+    for i, label in enumerate(tabs):
+        tab_center_x = i * tab_width + tab_width // 2
+        is_selected = (i == 0)
+        color = PRIMARY_COLOR if is_selected else GRAY
+        
+        # 计算文字宽度实现精确居中
+        label_bbox = draw.textbbox((0, 0), label, font=font_tab)
+        label_w = label_bbox[2] - label_bbox[0]
+        label_x = tab_center_x - label_w // 2
+        label_y = TAB_Y + (TAB_HEIGHT - (label_bbox[3] - label_bbox[1])) // 2 - 3
+        
+        draw.text((label_x, label_y), label, fill=color, font=font_tab)
     
     return img
 

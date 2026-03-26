@@ -57,7 +57,7 @@ def screenshot1_home():
     font_task_sub = get_font(32)        # 任务难度
     font_tab = get_font(36)             # Tab文字
     font_icon = get_font(44)            # 图标字母
-    font_plus = get_font(56)            # +号
+    font_plus = get_font(48)            # +号 - 调整大小以更好居中
     font_check = get_font(32)           # 对勾
     font_points = get_font(30)          # 积分文字
     

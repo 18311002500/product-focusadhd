@@ -1,0 +1,37 @@
+# .gitignore for Fastlane
+# 不提交敏感文件和生成的证书
+
+# 证书和私钥
+certs/
+profiles/
+*.p12
+*.mobileprovision
+*.cer
+*.certSigningRequest
+*.p8
+
+# 构建输出
+build/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/screenshots/screenshots.html
+fastlane/test_output/
+
+# 测试报告
+test_output/
+coverage/
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+!project.xcworkspace/.xcshareddata/swiftpm/Package.resolved
+
+# 临时文件
+*.tmp
+*.swp
+*.swo
+*~
+
+# 其他
+.DS_Store

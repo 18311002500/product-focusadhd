@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- HealthKit 权限 -->
+    <key>com.apple.developer.healthkit</key>
+    <true/>
+    
+    <!-- IAP 权限 -->
+    <key>com.apple.developer.in-app-payments</key>
+    <array>
+        <string>merchant.com.focusflow.app</string>
+    </array>
+    
+    <!-- App Groups（可选，用于 iCloud 同步） -->
+    <key>com.apple.security.application-groups</key>
+    <array>
+        <string>group.com.focusflow.app</string>
+    </array>
+    
+    <!-- Keychain 共享 -->
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.focusflow.app</string>
+    </array>
+</dict>
+</plist>

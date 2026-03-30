@@ -1,0 +1,13 @@
+# Appfile - Fastlane 应用配置
+
+# 应用标识符
+app_identifier("com.focusflow.app")
+
+# Apple Developer Portal 团队 ID（可选，会在首次运行时自动检测）
+# team_id("")
+
+# App Store Connect 团队 ID（与上面相同）
+# itc_team_id("")
+
+# 你的名字（用于签名）
+# apple_dev_portal_id("")

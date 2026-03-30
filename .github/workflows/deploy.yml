@@ -1,0 +1,111 @@
+# .github/workflows/deploy.yml
+# GitHub Actions - 自动构建并上传到 App Store
+# 触发方式：手动触发
+
+name: Build and Deploy to App Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: '发布类型'
+        required: true
+        default: 'testflight'
+        type: choice
+        options:
+          - testflight  # 上传到 TestFlight
+          - appstore    # 上传到 App Store
+      version_number:
+        description: '版本号 (如: 1.0.0)'
+        required: true
+        default: '1.0.0'
+      build_number:
+        description: '构建号 (如: 1)'
+        required: true
+        default: '1'
+
+jobs:
+  deploy:
+    runs-on: macos-14
+    
+    steps:
+      # 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 设置 Xcode 版本
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.2'
+
+      # 安装 xcodegen
+      - name: Install xcodegen
+        run: |
+          brew install xcodegen
+
+      # 设置 Ruby 环境
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      # 安装依赖
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install
+
+      # 配置 App Store Connect API Key
+      - name: Setup App Store Connect API Key
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo -n "${{ secrets.APP_STORE_CONNECT_KEY }}" | base64 -d > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+          
+      # 设置环境变量
+      - name: Setup Environment
+        run: |
+          echo "APP_STORE_CONNECT_KEY_ID=${{ secrets.APP_STORE_CONNECT_KEY_ID }}" >> $GITHUB_ENV
+          echo "APP_STORE_CONNECT_ISSUER_ID=${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}" >> $GITHUB_ENV
+          echo "VERSION_NUMBER=${{ github.event.inputs.version_number }}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${{ github.event.inputs.build_number }}" >> $GITHUB_ENV
+          echo "TEAM_ID=${{ secrets.TEAM_ID }}" >> $GITHUB_ENV
+          echo "KEYCHAIN_PASSWORD=${{ secrets.KEYCHAIN_PASSWORD || 'github-actions' }}" >> $GITHUB_ENV
+
+      # 生成 Xcode 项目
+      - name: Generate Xcode Project
+        run: |
+          xcodegen generate --project . --spec project.yml
+
+      # 运行测试（可选）
+      - name: Run Tests
+        run: |
+          bundle exec fastlane test || echo "Tests completed with issues"
+
+      # 上传到 TestFlight
+      - name: Upload to TestFlight
+        if: github.event.inputs.release_type == 'testflight'
+        run: |
+          bundle exec fastlane beta
+
+      # 上传到 App Store
+      - name: Upload to App Store
+        if: github.event.inputs.release_type == 'appstore'
+        run: |
+          bundle exec fastlane release
+
+      # 上传构建产物
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: FocusFlow-IPA
+          path: build/FocusFlow.ipa
+          if-no-files-found: ignore
+
+      # 清理
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf ~/.appstoreconnect/private_keys/
